@@ -319,6 +319,18 @@
   // iPhone/Safari solo acepta iniciar audio en "touchend" o "click" (no en "touchstart")
   ['click', 'touchend', 'keydown'].forEach(ev => addEventListener(ev, primerToque, { once: false, passive: true }));
 
+  /* ---- Si sales del navegador, cambias de app o bloqueas el celular → la música se pausa; al volver continúa ---- */
+  let pausadaPorOculta = false;
+  function alOcultar() {
+    if (!musica.paused) { pausadaPorOculta = true; musica.pause(); sonando = false; }
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) alOcultar();
+    else if (pausadaPorOculta && !musica.dataset.pausadaPorUsuario) { pausadaPorOculta = false; iniciarMusica(); }
+    else pausadaPorOculta = false;
+  });
+  addEventListener('pagehide', alOcultar);
+
   setTimeout(() => {   // la barra tarda 3 s en llenarse
     barraLlena = true;
     if (tocado) irAPantalla2();
