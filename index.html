@@ -44,20 +44,30 @@
   #s2 { color: #06402e; justify-content: flex-start;
     padding-top: calc(env(safe-area-inset-top, 0px) + clamp(14px, 4.5vh, 52px)); }
 
-  /* Bombones asomándose por el borde izquierdo de la pantalla */
-  #s2 .bombones {
+  /* Fila inferior: bombones (izquierda, asomándose por el borde) + meme a su derecha */
+  #s2 { --bh: clamp(170px, 33vh, 300px); }                       /* alto de los bombones */
+  @supports (height: 100dvh) { #s2 { --bh: clamp(170px, 33dvh, 300px); } }
+  @media (max-height: 560px) { #s2 { --bh: 30vh; } }
+  @media (min-aspect-ratio: 1/1) { #s2 { --bh: clamp(110px, 22vh, 200px); } }   /* pantallas horizontales (compu): más pequeño para no tapar el letrero */
+  #s2 .fila {
     position: absolute; left: 0; pointer-events: none;
+    right: max(16px, env(safe-area-inset-right));
     bottom: calc(env(safe-area-inset-bottom, 0px) + clamp(18px, 5vh, 56px));
-    transform: translateX(-102%); -webkit-transform: translateX(-102%);
-    will-change: transform;
+    display: flex; align-items: center; gap: 22px;               /* 22px = espacio entre bombones y meme */
   }
-  #s2 .bombones img { display: block; width: auto; height: clamp(170px, 33vh, 300px); transform-origin: 0% 90%;
+  #s2 .bombones { flex: none; transform: translateX(-102%); -webkit-transform: translateX(-102%); will-change: transform; }
+  #s2 .bombones img { display: block; width: auto; height: var(--bh); transform-origin: 0% 90%;
     -webkit-user-drag: none; filter: drop-shadow(4px 6px 8px rgba(0,60,40,.35)); }
-  @supports (height: 100dvh) { #s2 .bombones img { height: clamp(170px, 33dvh, 300px); } }
   /* Salen poco a poco: primero asoman las puntas, una pausa, y luego se muestran enteros */
   #s2.activa .bombones { animation: asomar 6s cubic-bezier(.45,.05,.3,1) 1.8s forwards; }
   #s2.activa .bombones img { animation: balanceo 3.4s ease-in-out 7.8s infinite; }
-  @media (max-height: 560px) { #s2 .bombones img { height: 30vh; } }
+
+  /* Meme: ocupa el espacio que queda a la derecha de los bombones, sin pasarse del tamaño de ellos */
+  #s2 .meme { flex: 1 1 0; min-width: 0; max-width: calc(var(--bh) * 1.25); opacity: 0; }
+  #s2 .meme img { display: block; width: 100%; height: auto; border-radius: 14px;
+    border: 3px solid rgba(255,255,255,.95); box-shadow: 0 8px 22px rgba(0,60,40,.35); -webkit-user-drag: none; }
+  /* Aparece justo cuando los bombones terminaron de entrar (1.8 s + 6 s = 7.8 s) */
+  #s2.activa .meme { animation: memeEntra .9s cubic-bezier(.2,1.3,.4,1) 7.8s forwards; }
   #s2 .diploma {
     background: rgba(255,255,255,.55); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
     border: 3px solid rgba(255,255,255,.9); border-radius: 28px;
@@ -95,6 +105,7 @@
     88%  { transform: translateX(-28%); }
     100% { transform: translateX(0); }
   }
+  @keyframes memeEntra { 0% { opacity: 0; transform: translateX(-24px) scale(.6) rotate(-6deg); } 100% { opacity: 1; transform: none; } }
   @keyframes balanceo { 0%,100% { transform: rotate(-1.6deg); } 50% { transform: rotate(1.6deg); } }
   @keyframes latido { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
 </style>
@@ -120,8 +131,12 @@
     <h2>Eres la mejor bióloga 🌱</h2>
     <div class="firma">Licenciada en Biología · Emily 🎓</div>
   </div>
-  <!-- Bombones: archivo "bombones.png" en la misma carpeta que este index.html -->
-  <div class="bombones"><img src="bombones.png" alt=""></div>
+  <div class="fila">
+    <!-- Bombones: archivo "bombones.png" en la misma carpeta que este index.html -->
+    <div class="bombones"><img src="bombones.png" alt=""></div>
+    <!-- Meme: archivo "meme.jpg" en la misma carpeta que este index.html -->
+    <div class="meme"><img src="meme.jpg" alt=""></div>
+  </div>
 </section>
 
 <!-- 🎵 AQUÍ VA TU CANCIÓN: archivo "cancion.mp3" en la misma carpeta que este index.html -->
