@@ -79,7 +79,7 @@
     border: none; border-radius: 50px; padding: 12px 18px; font: 700 15px 'Poppins', sans-serif;
     background: #0b6b4b; color: #fff; box-shadow: 0 6px 18px rgba(0,0,0,.3); cursor: pointer; display: none;
   }
-  #btnMusica.visible { display: block; animation: latido 1.4s ease-in-out infinite; }
+  #btnMusica.visible { display: block; }
   #btnMusica.sonando { animation: none; background: rgba(11,107,75,.85); padding: 12px 16px; }
 
   @keyframes aparece { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
@@ -249,17 +249,17 @@
 
   /* ---- Música ---- */
   let sonando = false;
-  function actualizarBoton() {
-    btn.classList.add('visible');
-    btn.classList.toggle('sonando', sonando);
-    btn.textContent = sonando ? '🔊' : '🎵 Toca para activar la música';
+  function actualizarBoton() {   // el botón 🔊 solo aparece cuando la música ya está sonando (sin avisos)
+    if (!sonando) return;
+    btn.classList.add('visible', 'sonando');
+    btn.textContent = '🔊';
   }
   function iniciarMusica() {
     musica.volume = 0.8;
     const p = musica.play();
     if (p && p.then) {
       p.then(() => { sonando = true; actualizarBoton(); })
-       .catch(() => { sonando = false; actualizarBoton(); });
+       .catch(() => { sonando = false; });
     }
   }
   btn.addEventListener('click', (e) => {
@@ -268,18 +268,15 @@
     else { delete musica.dataset.pausadaPorUsuario; iniciarMusica(); }
   });
 
-  // Si el navegador bloqueó el autoplay, cualquier toque inicia la música
-  function primerToque() {
-    if (modo === 2 && !sonando && !musica.dataset.pausadaPorUsuario) iniciarMusica();
-    else if (modo === 1) { // "desbloquear" el audio durante la bienvenida (para Safari)
-      musica.play().then(() => { if (modo === 1 && !sonando) { musica.pause(); musica.currentTime = 0; } }).catch(() => {});
-    }
-  }
-  // iPhone/Safari solo acepta iniciar audio en "touchend" o "click" (no en "touchstart")
-  ['click', 'touchend', 'keydown'].forEach(ev => addEventListener(ev, primerToque, { once: false, passive: true }));
+  /* ---- Flujo: la pantalla 2 aparece cuando la barra se llenó (3 s) Y ella ya tocó la pantalla ----
+         · Si toca antes de que se llene la barra  → pasa a la pantalla 2 justo cuando la barra termina (3 s)
+         · Si no ha tocado cuando se llena         → se queda esperando en la pantalla 1 hasta que toque */
+  let tocado = false, barraLlena = false, yaEnPantalla2 = false;
 
-  /* ---- Transición a la pantalla 2 a los 3 segundos ---- */
-  setTimeout(() => {
+  function irAPantalla2() {
+    if (yaEnPantalla2) return;
+    yaEnPantalla2 = true;
+    iniciarMusica();   // se llama aquí mismo para que cuente como parte del toque (iPhone/Safari)
     document.getElementById('s1').classList.remove('activa');
     document.body.classList.add('dia');
     modo = 2;
@@ -287,8 +284,29 @@
       document.getElementById('s2').classList.add('activa');
       rafaga();
       setInterval(rafaga, 6000);
-      iniciarMusica();
     }, 600);
+  }
+
+  function primerToque() {
+    if (modo === 2) {   // por si el navegador bloqueó la música, cualquier toque la inicia (sin avisos)
+      if (!sonando && !musica.dataset.pausadaPorUsuario) iniciarMusica();
+      return;
+    }
+    if (tocado) return;
+    tocado = true;
+    if (barraLlena) {
+      irAPantalla2();
+    } else {
+      // "desbloquear" el audio con este toque para que luego pueda sonar solo (Safari)
+      musica.play().then(() => { if (modo === 1 && !sonando) { musica.pause(); musica.currentTime = 0; } }).catch(() => {});
+    }
+  }
+  // iPhone/Safari solo acepta iniciar audio en "touchend" o "click" (no en "touchstart")
+  ['click', 'touchend', 'keydown'].forEach(ev => addEventListener(ev, primerToque, { once: false, passive: true }));
+
+  setTimeout(() => {   // la barra tarda 3 s en llenarse
+    barraLlena = true;
+    if (tocado) irAPantalla2();
   }, 3000);
 })();
 </script>
