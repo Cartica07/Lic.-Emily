@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#04140f">
+<title>Felicidades Licenciada Emily 🧬</title>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  html, body { height: 100%; overflow: hidden; font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+    -webkit-user-select: none; user-select: none; touch-action: manipulation; overscroll-behavior: none; }
+  body { background: #04140f; transition: background 1.2s; position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100%; }
+  body.dia { background: linear-gradient(160deg, #b8f5c8, #7ee0c3 45%, #4fc3a1); }
+
+  canvas#bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+
+  .pantalla {
+    position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 1;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 24px;
+    padding-left: max(24px, env(safe-area-inset-left)); padding-right: max(24px, env(safe-area-inset-right));
+    opacity: 0; pointer-events: none; transition: opacity 1.2s ease;
+  }
+  .pantalla.activa { opacity: 1; pointer-events: auto; }
+
+  /* ---------- Pantalla 1 ---------- */
+  #s1 { color: #d8ffe8; }
+  #s1 .pre { font-size: clamp(14px, 4vw, 20px); letter-spacing: 6px; text-transform: uppercase; color: #7dffb8; margin-bottom: 14px; animation: aparece 1s ease both; }
+  #s1 h1 { font-family: 'Pacifico', cursive; font-weight: 400; font-size: clamp(44px, 13vw, 96px); line-height: 1.1;
+    background: linear-gradient(90deg, #7dffb8, #5ef2ff, #b6ff6a, #7dffb8); background-size: 300% 100%;
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: brillo 3s linear infinite, aparece 1.2s .2s ease both; filter: drop-shadow(0 0 18px rgba(125,255,184,.55)); }
+  #s1 .sub { margin-top: 18px; font-size: clamp(14px, 4vw, 18px); color: #a8e8c8; animation: aparece 1s .8s ease both; }
+  #s1 .sub, #s1 .toque { max-width: min(250px, 62vw); }
+  #s1 .toque { margin-top: 26px; font-size: clamp(26px, 8vw, 34px); font-weight: 800; line-height: 1.15; letter-spacing: 1px;
+    color: #fff; text-shadow: 0 0 14px rgba(125,255,184,.9), 0 0 28px rgba(94,242,255,.6);
+    animation: aparece .8s .6s ease both, latido 1.2s 1.4s ease-in-out infinite; }
+  .barra { width: min(260px, 70vw); height: 6px; border-radius: 6px; background: rgba(255,255,255,.12); margin-top: 28px; overflow: hidden; }
+  .barra i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #7dffb8, #5ef2ff); border-radius: 6px; animation: carga 3s linear forwards; }
+
+  /* ---------- Pantalla 2 ---------- */
+  #s2 { color: #06402e; justify-content: flex-start;
+    padding-top: calc(env(safe-area-inset-top, 0px) + clamp(14px, 4.5vh, 52px)); }
+
+  /* Bombones asomándose por el borde izquierdo de la pantalla */
+  #s2 .bombones {
+    position: absolute; left: 0; pointer-events: none;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + clamp(18px, 5vh, 56px));
+    transform: translateX(-102%); -webkit-transform: translateX(-102%);
+    will-change: transform;
+  }
+  #s2 .bombones img { display: block; width: auto; height: clamp(170px, 33vh, 300px); transform-origin: 0% 90%;
+    -webkit-user-drag: none; filter: drop-shadow(4px 6px 8px rgba(0,60,40,.35)); }
+  @supports (height: 100dvh) { #s2 .bombones img { height: clamp(170px, 33dvh, 300px); } }
+  /* Salen poco a poco: primero asoman las puntas, una pausa, y luego se muestran enteros */
+  #s2.activa .bombones { animation: asomar 6s cubic-bezier(.45,.05,.3,1) 1.8s forwards; }
+  #s2.activa .bombones img { animation: balanceo 3.4s ease-in-out 7.8s infinite; }
+  @media (max-height: 560px) { #s2 .bombones img { height: 30vh; } }
+  #s2 .diploma {
+    background: rgba(255,255,255,.55); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    border: 3px solid rgba(255,255,255,.9); border-radius: 28px;
+    padding: clamp(22px, 5vw, 44px) clamp(18px, 5vw, 48px); max-width: 760px; width: 100%;
+    box-shadow: 0 20px 60px rgba(0,80,50,.25);
+    transform: scale(.7); opacity: 0;
+  }
+  #s2.activa .diploma { animation: pop 1s .3s cubic-bezier(.2,1.4,.4,1) forwards; }
+  #s2 .emojis { font-size: clamp(34px, 10vw, 56px); animation: flota 2.6s ease-in-out infinite; }
+  #s2 h1 { font-weight: 800; font-size: clamp(26px, 7.5vw, 54px); line-height: 1.15; color: #0b6b4b; margin: 10px 0 6px; text-transform: uppercase; }
+  #s2 h2 { font-family: 'Pacifico', cursive; font-weight: 400; font-size: clamp(26px, 7.5vw, 50px); line-height: 1.25;
+    background: linear-gradient(90deg, #e0457b, #ff8a3d, #e0457b); background-size: 200% 100%;
+    -webkit-background-clip: text; background-clip: text; color: transparent; animation: brillo 3s linear infinite; margin-top: 8px; }
+  #s2 .firma { margin-top: 16px; font-size: clamp(14px, 4vw, 18px); color: #1b7d5a; font-weight: 700; }
+
+  #btnMusica {
+    position: fixed; z-index: 5;
+    right: max(16px, env(safe-area-inset-right)); bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+    border: none; border-radius: 50px; padding: 12px 18px; font: 700 15px 'Poppins', sans-serif;
+    background: #0b6b4b; color: #fff; box-shadow: 0 6px 18px rgba(0,0,0,.3); cursor: pointer; display: none;
+  }
+  #btnMusica.visible { display: block; animation: latido 1.4s ease-in-out infinite; }
+  #btnMusica.sonando { animation: none; background: rgba(11,107,75,.85); padding: 12px 16px; }
+
+  @keyframes aparece { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+  @keyframes brillo { to { background-position: 300% 0; } }
+  @keyframes carga { to { width: 100%; } }
+  @keyframes pop { to { transform: scale(1); opacity: 1; } }
+  @keyframes flota { 0%,100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-10px) rotate(3deg); } }
+  @keyframes asomar {
+    0%   { transform: translateX(-102%); }
+    30%  { transform: translateX(-70%); }
+    45%  { transform: translateX(-70%); }
+    75%  { transform: translateX(-28%); }
+    88%  { transform: translateX(-28%); }
+    100% { transform: translateX(0); }
+  }
+  @keyframes balanceo { 0%,100% { transform: rotate(-1.6deg); } 50% { transform: rotate(1.6deg); } }
+  @keyframes latido { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+</style>
+</head>
+<body>
+
+<canvas id="bg"></canvas>
+
+<!-- PANTALLA 1: Bienvenida (3 segundos) -->
+<section id="s1" class="pantalla activa">
+  <div class="pre">🧬 Bienvenida 🧬</div>
+  <h1>Licenciada<br>Emily</h1>
+  <div class="sub">💚 Cargando todo mi amor, un momento...</div>
+  <div class="barra"><i></i></div>
+  <div class="toque">TOCA LA<br>PANTALLA 👆</div>
+</section>
+
+<!-- PANTALLA 2: Felicitación -->
+<section id="s2" class="pantalla">
+  <div class="diploma">
+    <div class="emojis">🧬🔬🦋🌿</div>
+    <h1>¡Felicidades por aprobar tu proyecto!</h1>
+    <h2>Eres la mejor bióloga 🌱</h2>
+    <div class="firma">Licenciada en Biología · Emily 🎓</div>
+  </div>
+  <!-- Bombones: archivo "bombones.png" en la misma carpeta que este index.html -->
+  <div class="bombones"><img src="bombones.png" alt=""></div>
+</section>
+
+<!-- 🎵 AQUÍ VA TU CANCIÓN: archivo "cancion.mp3" en la misma carpeta que este index.html -->
+<audio id="musica" src="cancion.mp3" loop preload="auto"></audio>
+<button id="btnMusica">🎵 Toca para activar la música</button>
+
+<script>
+(function () {
+  const canvas = document.getElementById('bg');
+  const ctx = canvas.getContext('2d');
+  const musica = document.getElementById('musica');
+  const btn = document.getElementById('btnMusica');
+  let W, H, dpr, modo = 1, t = 0;
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = innerWidth; H = innerHeight;
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  addEventListener('resize', resize); resize();
+
+  const rnd = (a, b) => a + Math.random() * (b - a);
+
+  /* ---- Células (pantalla 1) ---- */
+  const celulas = Array.from({ length: 22 }, () => ({
+    x: rnd(0, 1), y: rnd(0, 1), r: rnd(18, 60), vx: rnd(-.0002, .0002), vy: rnd(-.0003, .0003),
+    fase: rnd(0, 6.28), hue: rnd(120, 190)
+  }));
+  const burbujas = Array.from({ length: 40 }, () => ({ x: rnd(0, 1), y: rnd(0, 1), r: rnd(2, 6), v: rnd(.0004, .0012) }));
+
+  function dibujarCelulas() {
+    celulas.forEach(c => {
+      c.x += c.vx; c.y += c.vy;
+      if (c.x < -.1) c.x = 1.1; if (c.x > 1.1) c.x = -.1;
+      if (c.y < -.1) c.y = 1.1; if (c.y > 1.1) c.y = -.1;
+      const px = c.x * W, py = c.y * H, pulso = 1 + Math.sin(t * 2 + c.fase) * .06, r = c.r * pulso;
+      const g = ctx.createRadialGradient(px, py, r * .1, px, py, r);
+      g.addColorStop(0, `hsla(${c.hue},90%,60%,.35)`);
+      g.addColorStop(1, `hsla(${c.hue},90%,40%,.08)`);
+      ctx.beginPath(); ctx.arc(px, py, r, 0, 6.283); ctx.fillStyle = g; ctx.fill();
+      ctx.strokeStyle = `hsla(${c.hue},90%,70%,.45)`; ctx.lineWidth = 1.5; ctx.stroke();
+      // núcleo
+      ctx.beginPath(); ctx.arc(px + r * .15, py - r * .1, r * .32, 0, 6.283);
+      ctx.fillStyle = `hsla(${c.hue + 40},90%,65%,.55)`; ctx.fill();
+      ctx.beginPath(); ctx.arc(px + r * .22, py - r * .16, r * .1, 0, 6.283);
+      ctx.fillStyle = 'rgba(255,255,255,.6)'; ctx.fill();
+    });
+    burbujas.forEach(b => {
+      b.y -= b.v; if (b.y < -.05) { b.y = 1.05; b.x = rnd(0, 1); }
+      ctx.beginPath(); ctx.arc(b.x * W + Math.sin(t * 2 + b.y * 9) * 6, b.y * H, b.r, 0, 6.283);
+      ctx.strokeStyle = 'rgba(180,255,220,.4)'; ctx.lineWidth = 1; ctx.stroke();
+    });
+  }
+
+  /* ---- ADN (ambas pantallas) ---- */
+  function adn(cx, amp, c1, c2, fase) {
+    const paso = 16, freq = 0.02;
+    for (let y = -20; y < H + 20; y += paso) {
+      const a = t * 1.6 + y * freq + fase;
+      const x1 = cx + Math.sin(a) * amp, x2 = cx - Math.sin(a) * amp;
+      const z1 = Math.cos(a), z2 = -z1;
+      ctx.strokeStyle = 'rgba(255,255,255,.28)'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(x1, y); ctx.lineTo(x2, y); ctx.stroke();
+      ctx.beginPath(); ctx.arc(x1, y, 5 + z1 * 2.2, 0, 6.283); ctx.fillStyle = c1; ctx.fill();
+      ctx.beginPath(); ctx.arc(x2, y, 5 + z2 * 2.2, 0, 6.283); ctx.fillStyle = c2; ctx.fill();
+    }
+  }
+
+  /* ---- Elementos pantalla 2: hojas, mariposas, confeti ---- */
+  const EMO = ['🍃', '🌿', '🌸', '🧬', '🔬', '🦠', '🐞', '🌱', '🍀', '🦋'];
+  const caida = Array.from({ length: 28 }, () => nuevo(true));
+  function nuevo(inicial) {
+    return { x: rnd(0, 1), y: inicial ? rnd(-.2, 1) : rnd(-.2, 0), e: EMO[(Math.random() * EMO.length) | 0],
+      s: rnd(20, 40), v: rnd(.0008, .002), rot: rnd(0, 6.28), vr: rnd(-.03, .03), osc: rnd(0, 6.28) };
+  }
+  const mariposas = Array.from({ length: 5 }, () => ({ x: rnd(0, 1), y: rnd(.1, .9), f: rnd(0, 6.28), v: rnd(.0006, .0012) }));
+  let confeti = [];
+  function rafaga() {
+    for (let i = 0; i < 40; i++) {
+      confeti.push({ x: W / 2, y: H * .3, vx: rnd(-7, 7), vy: rnd(-13, -3), e: EMO[(Math.random() * EMO.length) | 0], s: rnd(18, 34), rot: rnd(0, 6.28), vr: rnd(-.2, .2), vida: 1 });
+    }
+  }
+  function dibujarEmoji(e, x, y, s, rot, alpha) {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.globalAlpha = alpha == null ? 1 : alpha;
+    ctx.font = s + 'px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(e, 0, 0); ctx.restore();
+  }
+  function dibujarJardin() {
+    caida.forEach((p, i) => {
+      p.y += p.v; p.rot += p.vr;
+      if (p.y > 1.1) caida[i] = nuevo(false);
+      dibujarEmoji(p.e, p.x * W + Math.sin(t * 1.5 + p.osc) * 30, p.y * H, p.s, p.rot, .9);
+    });
+    mariposas.forEach(m => {
+      m.x += m.v; if (m.x > 1.1) { m.x = -.1; m.y = rnd(.1, .9); }
+      const aleteo = Math.abs(Math.sin(t * 9 + m.f));
+      ctx.save(); ctx.translate(m.x * W, m.y * H + Math.sin(t * 2 + m.f) * 25); ctx.scale(.5 + aleteo * .6, 1);
+      ctx.font = '34px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('🦋', 0, 0); ctx.restore();
+    });
+    confeti = confeti.filter(c => c.vida > 0);
+    confeti.forEach(c => {
+      c.vy += .25; c.x += c.vx; c.y += c.vy; c.rot += c.vr; c.vida -= .008;
+      dibujarEmoji(c.e, c.x, c.y, c.s, c.rot, Math.max(c.vida, 0));
+    });
+  }
+
+  function frame() {
+    t += 0.016;
+    ctx.clearRect(0, 0, W, H);
+    if (modo === 1) {
+      const g = ctx.createRadialGradient(W / 2, H / 2, 40, W / 2, H / 2, Math.max(W, H) * .8);
+      g.addColorStop(0, '#0b3b2c'); g.addColorStop(1, '#04140f');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+      dibujarCelulas();
+      adn(W * .12, Math.min(34, W * .07), '#7dffb8', '#5ef2ff', 0);
+      adn(W * .88, Math.min(34, W * .07), '#b6ff6a', '#ff7de0', 2);
+    } else {
+      adn(W * .08, Math.min(30, W * .06), '#0b6b4b', '#e0457b', 0);
+      adn(W * .92, Math.min(30, W * .06), '#ff8a3d', '#0b6b4b', 2);
+      dibujarJardin();
+    }
+    requestAnimationFrame(frame);
+  }
+  frame();
+
+  /* ---- Música ---- */
+  let sonando = false;
+  function actualizarBoton() {
+    btn.classList.add('visible');
+    btn.classList.toggle('sonando', sonando);
+    btn.textContent = sonando ? '🔊' : '🎵 Toca para activar la música';
+  }
+  function iniciarMusica() {
+    musica.volume = 0.8;
+    const p = musica.play();
+    if (p && p.then) {
+      p.then(() => { sonando = true; actualizarBoton(); })
+       .catch(() => { sonando = false; actualizarBoton(); });
+    }
+  }
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (sonando) { musica.dataset.pausadaPorUsuario = '1'; musica.pause(); sonando = false; btn.textContent = '🔇'; btn.classList.remove('sonando'); }
+    else { delete musica.dataset.pausadaPorUsuario; iniciarMusica(); }
+  });
+
+  // Si el navegador bloqueó el autoplay, cualquier toque inicia la música
+  function primerToque() {
+    if (modo === 2 && !sonando && !musica.dataset.pausadaPorUsuario) iniciarMusica();
+    else if (modo === 1) { // "desbloquear" el audio durante la bienvenida (para Safari)
+      musica.play().then(() => { if (modo === 1 && !sonando) { musica.pause(); musica.currentTime = 0; } }).catch(() => {});
+    }
+  }
+  // iPhone/Safari solo acepta iniciar audio en "touchend" o "click" (no en "touchstart")
+  ['click', 'touchend', 'keydown'].forEach(ev => addEventListener(ev, primerToque, { once: false, passive: true }));
+
+  /* ---- Transición a la pantalla 2 a los 3 segundos ---- */
+  setTimeout(() => {
+    document.getElementById('s1').classList.remove('activa');
+    document.body.classList.add('dia');
+    modo = 2;
+    setTimeout(() => {
+      document.getElementById('s2').classList.add('activa');
+      rafaga();
+      setInterval(rafaga, 6000);
+      iniciarMusica();
+    }, 600);
+  }, 3000);
+})();
+</script>
+</body>
+</html>
